@@ -7,6 +7,7 @@ else
 	colors desert
 endif
 set enc=utf-8
+set bs=eol,start,indent
 set nu
 set ru
 set cursorline
