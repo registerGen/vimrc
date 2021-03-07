@@ -70,8 +70,13 @@ endfunc
 map <F8> :call Compile(1)<CR>
 map <F9> :call Compile(0)<CR>
 map <F12> :call Run()<CR>
+imap <F8> <ESC>:call Compile(1)<CR>
 imap <F9> <ESC>:call Compile(0)<CR>
 imap <F12> <ESC>:call Run()<CR>
+if has("win32")
+	map <F11> :call Compile(0)<CR>:call Run()<CR>
+	imap <F11> <ESC>:call Compile(0)<CR>:call Run()<CR>
+endif
 
 " Plugins
 call plug#begin('~/.vim/plugged')
