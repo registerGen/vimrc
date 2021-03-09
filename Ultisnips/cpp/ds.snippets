@@ -1,0 +1,13 @@
+snippet dsu "Data structures - disjoint set union"
+struct DSU{
+	int fa[N+10],n;
+	DSU(int _n=0){init(_n);}
+	inline void init(int _n){n=_n;for(int i=1;i<=_n;i++)fa[i]=i;}
+	int getRt(int u){return fa[u]==u?u:fa[u]=getRt(fa[u]);}
+	inline bool same(int u,int v){return getRt(u)==getRt(v);}
+	inline void merge(int u,int v){
+		int fu=getRt(u),fv=getRt(v);
+		if(fu!=fv)fa[fu]=fv;
+	}
+}dsu;
+endsnippet

@@ -1,0 +1,15 @@
+snippet edge "Graph - unweighted edge"
+struct Edge{int to,nxt;}e[${1:M}${2:*2}+10];int head[N+10],tote=1;
+inline void addEdge(int u,int v){e[++tote].to=v;e[tote].nxt=head[u];head[u]=tote;}
+endsnippet
+
+snippet wedge "Graph - weighted edge"
+struct Edge{int to,nxt;${1:int} w;}e[${2:M}${3:*2}+10];int head[N+10],tote=1;
+inline void addEdge(int u,int v,$1 w){e[++tote].to=v;e[tote].w=w;e[tote].nxt=head[u];head[u]=tote;}
+endsnippet
+
+snippet cedege "Graph - network flow (max flow)"
+struct Edge{int to,nxt;${1:int} c;}e[M*2+10];int head[N+10],tote=1;
+inline void addEdge(int u,int v,$1 c){e[++tote].to=v;e[tote].c=c;e[tote].nxt=head[u];head[u]=tote;}
+inline void addFlow(int u,int v,$1 c){addEdge(u,v,c);addEdge(v,u,0);}
+endsnippet
