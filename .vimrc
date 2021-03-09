@@ -10,7 +10,7 @@ set enc=utf-8
 set bs=eol,start,indent
 set nu
 set ru
-set cursorline
+set cul
 set mouse=a
 set ts=2
 set sw=2
