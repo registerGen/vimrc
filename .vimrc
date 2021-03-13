@@ -1,7 +1,7 @@
 set nocompatible
 
 " UI settings
-if has("gui_running")
+if has('gui_running')
 	colors evening
 else
 	colors desert
@@ -15,8 +15,8 @@ set mouse=a
 set ts=2
 set sw=2
 set completeopt-=preview
-if has("gui_running")
-	if has("win32")
+if has('gui_running')
+	if has('win32')
 		set guifont=Cascadia\ Code\ PL::h15
 	else
 		set guifont=Ubuntu\ Mono\ 15
@@ -35,32 +35,32 @@ set noswapfile
 
 " Compile and run codes
 func! Compile(isInteractive)
-	exec "w"
-	let cmd = "!"
-	if &filetype == "cpp"
-		let cmd = cmd . "g++ -Wall -Wextra -Wconversion -Wshadow -lm"
+	exec 'w'
+	let cmd = '!'
+	if &filetype == 'cpp'
+		let cmd = cmd . 'g++ -Wall -Wextra -Wconversion -Wshadow -lm'
 		if a:isInteractive == 1
-			let cmd = cmd . " grader.cpp"
+			let cmd = cmd . ' grader.cpp'
 		endif
-		if has("win32")
-			let cmd = cmd . " -Wl,--stack=2147483647"
+		if has('win32')
+			let cmd = cmd . ' -Wl,--stack=2147483647'
 		endif
-		let cmd = cmd . " -o " . expand('%<') . " " . expand('%')
-	elseif &filetype == "python"
-		let cmd = cmd . "python3 %"
+		let cmd = cmd . ' -o ' . expand('%<') . ' ' . expand('%')
+	elseif &filetype == 'python'
+		let cmd = cmd . 'python3 %'
 	endif
 	echom cmd
 	exec cmd
 endfunc
 
 func! Run()
-	let cmd = "!"
-	if &filetype == "cpp"
-		if !has("win32")
-			let cmd = cmd . "./"
+	let cmd = '!'
+	if &filetype == 'cpp'
+		if !has('win32')
+			let cmd = cmd . './'
 		endif
 		let cmd = cmd . expand('%<')
-	elseif &filetype == "python"
+	elseif &filetype == 'python'
 		call Compile(0)
 		return
 	endif
@@ -74,7 +74,7 @@ map <F12> :call Run()<CR>
 imap <F8> <ESC>:call Compile(1)<CR>
 imap <F9> <ESC>:call Compile(0)<CR>
 imap <F12> <ESC>:call Run()<CR>
-if has("win32")
+if has('win32')
 	map <F11> :call Compile(0)<CR>:call Run()<CR>
 	imap <F11> <ESC>:call Compile(0)<CR>:call Run()<CR>
 endif
@@ -113,31 +113,31 @@ func! g:UltiSnips_Complete()
 	call UltiSnips#ExpandSnippet()
 	if g:ulti_expand_res == 0
 		if pumvisible()
-			return "\<C-n>"
+			return '\<C-n>'
 		else
 			call UltiSnips#JumpForwards()
 			if g:ulti_jump_forwards_res == 0
-				return "\<TAB>"
+				return '\<TAB>'
 			endif
 		endif
 	endif
-	return ""
+	return ''
 endfunc
 
 func! g:UltiSnips_Reverse()
 	call UltiSnips#JumpBackwards()
 	if g:ulti_jump_backwards_res == 0
-		return "\<C-P>"
+		return '\<C-P>'
 	endif
-	return ""
+	return ''
 endfunc
 
-if !exists("g:UltiSnipsJumpForwardTrigger")
-	let g:UltiSnipsJumpForwardTrigger = "<tab>"
+if !exists('g:UltiSnipsJumpForwardTrigger')
+	let g:UltiSnipsJumpForwardTrigger = '<tab>'
 endif
-if !exists("g:UltiSnipsJumpBackwardTrigger")
-	let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+if !exists('g:UltiSnipsJumpBackwardTrigger')
+	let g:UltiSnipsJumpBackwardTrigger = '<s-tab>'
 endif
 
-autocmd InsertEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
-autocmd InsertEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
+autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsExpandTrigger . ' <C-R>=g:UltiSnips_Complete()<cr>'
+autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger . ' <C-R>=g:UltiSnips_Reverse()<cr>'
