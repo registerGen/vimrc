@@ -58,6 +58,11 @@ function! Compile(additionalArgs) " {{{2
 		endif
 	elseif fileType == 'vim'
 		let cmd = 'so ' . fileName
+	else
+		echohl Error
+		echom printf('.vimrc::Compile(): Unrecognizable file type "%s"', fileType)
+		echohl None
+		return
 	endif
 "	TODO: install xelatex on my computer
 "	elseif fileType == 'tex'
@@ -90,6 +95,11 @@ function! Run(additionalArgs) " {{{2
 		endif
 	elseif fileType == 'python' || fileType == 'vim'
 		call Compile(a:additionalArgs)
+		return
+	else
+		echohl Error
+		echom printf('.vimrc::Run(): Unrecognizable file type "%s"', fileType)
+		echohl None
 		return
 	endif
 "	TODO: install xelatex on my computer
