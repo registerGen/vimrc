@@ -87,6 +87,13 @@ function! Run(additionalArgs) " {{{2
 	let fileType = &filetype
 	let cmd = ''
 
+	if &modified == 1
+		echohl WarningMsg
+		echom printf('.vimrc::Run(): file "%s" not saved', fileName)
+		echohl None
+		return
+	endif
+
 	if fileType == 'cpp' || fileType == 'c'
 		if s:isWin
 			let cmd = '!' . executableFileName
@@ -98,7 +105,7 @@ function! Run(additionalArgs) " {{{2
 		return
 	else
 		echohl Error
-		echom printf('.vimrc::Run(): Unrecognizable file type "%s"', fileType)
+		echom printf('.vimrc::Run(): unrecognizable file type "%s"', fileType)
 		echohl None
 		return
 	endif
@@ -129,14 +136,17 @@ function! CompileAndRun(additionalArgs) " {{{2
 	endif
 endfunction
 
-" Mappings {{{2
-map <F9> :call Compile('')<CR>
-map <F12> :call Run('')<CR>
-imap <F9> <ESC>:call Compile('')<CR>
-imap <F12> <ESC>:call Run('')<CR>
+" Commands and mappings {{{2
+command -nargs=* Compile :call Compile(<q-args>)
+command -nargs=* Run :call Run(<q-args>)
+command -nargs=* CompileAndRun :call CompileAndRun(<q-args>)
+map <F9> :Compile<CR>
+map <F12> :Run<CR>
+imap <F9> <ESC>:Compile<CR>
+imap <F12> <ESC>:Run<CR>
 if s:isGUI " Mapping F11 is not available in terminals
-	map <F11> :call CompileAndRun('')<CR>
-	imap <F11> <ESC>:call CompileAndRun('')<CR>
+	map <F11> :CompileAndRun<CR>
+	imap <F11> <ESC>:CompileAndRun<CR>
 endif
 
 " Section: Plugins {{{1
