@@ -99,7 +99,8 @@ function! Run(additionalArgs) " {{{2
 	endif
 	if b:compiled == 0
 		echom printf('.vimrc::Run(): file "%s" not compiled, we''ll compile it first', fileName)
-		call Compile(a:additionalArgs)
+		let _additionalArgs = input('.vimrc::Run(): please input additional arguments for compiling: ')
+		call Compile(_additionalArgs)
 	endif
 
 	if fileType == 'cpp' || fileType == 'c'
