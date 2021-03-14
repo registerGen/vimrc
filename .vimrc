@@ -35,8 +35,12 @@ syntax enable
 syntax on
 
 " Section: Compile and run codes {{{1
+let b:compiled = 0
+autocmd BufWrite * let b:compiled = 0
+
 function! Compile(additionalArgs) " {{{2
 	exec 'w'
+	let b:compiled = 1
 	let fileName = expand('%')
 	if s:isWin
 		let executableFileName = expand('%<') . '.exe'
@@ -60,7 +64,7 @@ function! Compile(additionalArgs) " {{{2
 		let cmd = 'so ' . fileName
 	else
 		echohl Error
-		echom printf('.vimrc::Compile(): Unrecognizable file type "%s"', fileType)
+		echom printf('.vimrc::Compile(): unrecognizable file type "%s"', fileType)
 		echohl None
 		return
 	endif
@@ -92,6 +96,10 @@ function! Run(additionalArgs) " {{{2
 		echom printf('.vimrc::Run(): file "%s" not saved', fileName)
 		echohl None
 		return
+	endif
+	if b:compiled == 0
+		echom printf('.vimrc::Run(): file "%s" not compiled, we''ll compile it first', fileName)
+		call Compile(a:additionalArgs)
 	endif
 
 	if fileType == 'cpp' || fileType == 'c'
