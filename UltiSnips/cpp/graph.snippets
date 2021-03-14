@@ -41,7 +41,7 @@ void DFS(int u,int _fa){
 	for(int i=head[u];i;i=e[i].nxt){
 		int v=e[i].to;
 		if((i^1)==_fa)continue;
-		if(!dfn[v])DFS(v),low[u]=std::min(low[u],low[v]);
+		if(!dfn[v])DFS(v,i),low[u]=std::min(low[u],low[v]);
 		else if(inStk[v])low[u]=std::min(low[u],dfn[v]);
 	}
 	if(dfn[u]==low[u]){
