@@ -2,6 +2,11 @@ set nocp " nocompatible
 
 let s:isWin = has('win32')
 let s:isGUI = has('gui_running')
+if s:isWin
+	let s:vimrcName = '_vimrc'
+else
+	let s:vimrcName = '.vimrc'
+endif
 
 " Section: UI settings {{{1
 if s:isGUI
@@ -36,7 +41,7 @@ syntax on
 
 " Section: Compile and run codes {{{1
 let b:compiled = 0
-autocmd BufWrite * let b:compiled = 0
+autocmd BufWrite,BufRead,BufNew * let b:compiled = 0
 
 function! Compile(additionalArgs) " {{{2
 	exec 'w'
@@ -64,7 +69,7 @@ function! Compile(additionalArgs) " {{{2
 		let cmd = 'so ' . fileName
 	else
 		echohl Error
-		echom printf('.vimrc::Compile(): unrecognizable file type "%s"', fileType)
+		echom printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType)
 		echohl None
 		return
 	endif
@@ -76,7 +81,7 @@ function! Compile(additionalArgs) " {{{2
 	if a:additionalArgs != ''
 		let cmd .= ' ' . a:additionalArgs
 	endif
-	echom printf('.vimrc::Compile(): command is "%s"', cmd)
+	echom printf('%s::Compile(): command is "%s"', s:vimrcName, cmd)
 	exec cmd
 endfunction
 
@@ -93,13 +98,13 @@ function! Run(additionalArgs) " {{{2
 
 	if &modified == 1
 		echohl WarningMsg
-		echom printf('.vimrc::Run(): file "%s" not saved', fileName)
+		echom printf('%s::Run(): file "%s" not saved', s:vimrcName, fileName)
 		echohl None
 		return
 	endif
 	if b:compiled == 0
-		echom printf('.vimrc::Run(): file "%s" not compiled, we''ll compile it first', fileName)
-		let _additionalArgs = input('.vimrc::Run(): please input additional arguments for compiling: ')
+		echom printf('%s::Run(): file "%s" not compiled, we''ll compile it first', s:vimrcName, fileName)
+		let _additionalArgs = input(printf('%s::Run(): please input additional arguments for compiling: ', s:vimrcName))
 		call Compile(_additionalArgs)
 	endif
 
@@ -114,7 +119,7 @@ function! Run(additionalArgs) " {{{2
 		return
 	else
 		echohl Error
-		echom printf('.vimrc::Run(): unrecognizable file type "%s"', fileType)
+		echom printf('%s::Run(): unrecognizable file type "%s"', s:vimrcName, fileType)
 		echohl None
 		return
 	endif
@@ -131,32 +136,17 @@ function! Run(additionalArgs) " {{{2
 	if a:additionalArgs != ''
 		let cmd .= ' ' . a:additionalArgs
 	endif
-	echom printf('.vimrc::Run(): command is "%s"', cmd)
+	echom printf('%s::Run(): command is "%s"', s:vimrcName, cmd)
 	exec cmd
-endfunction
-
-function! CompileAndRun(additionalArgs) " {{{2
-	let fileType = &filetype
-	if fileType == 'cpp' || fileType == 'c' || fileType == 'tex'
-		call Compile(a:additionalArgs)
-		call Run(a:additionalArgs)
-	elseif fileType == 'python' || fileType == 'vim'
-		call Compile(a:additionalArgs)
-	endif
 endfunction
 
 " Commands and mappings {{{2
 command -nargs=* Compile :call Compile(<q-args>)
 command -nargs=* Run :call Run(<q-args>)
-command -nargs=* CompileAndRun :call CompileAndRun(<q-args>)
 map <F9> :Compile<CR>
 map <F12> :Run<CR>
 imap <F9> <ESC>:Compile<CR>
 imap <F12> <ESC>:Run<CR>
-if s:isGUI " Mapping F11 is not available in terminals
-	map <F11> :CompileAndRun<CR>
-	imap <F11> <ESC>:CompileAndRun<CR>
-endif
 
 " Section: Plugins {{{1
 " Subsection: Load Plugins {{{2
