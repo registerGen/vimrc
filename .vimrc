@@ -36,6 +36,7 @@ endif
 
 filetype plugin on
 filetype indent on
+let g:tex_flavor = 'latex'
 syntax enable
 syntax on
 
@@ -67,20 +68,19 @@ function! Compile(additionalArgs) " {{{2
 		endif
 	elseif fileType == 'vim'
 		let cmd = 'so ' . fileName
+	elseif fileType == 'tex'
+		let cmd = '!xelatex ' . fileName
 	else
 		echohl Error
 		echom printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType)
 		echohl None
 		return
 	endif
-"	TODO: install xelatex on my computer
-"	elseif fileType == 'tex'
-"		let cmd = '!xelatex ' . fileName
-"	endif
 
 	if a:additionalArgs != ''
 		let cmd .= ' ' . a:additionalArgs
 	endif
+	echohl None
 	echom printf('%s::Compile(): command is "%s"', s:vimrcName, cmd)
 	exec cmd
 endfunction
@@ -103,6 +103,7 @@ function! Run(additionalArgs) " {{{2
 		return
 	endif
 	if b:compiled == 0
+		echohl None
 		echom printf('%s::Run(): file "%s" not compiled, we''ll compile it first', s:vimrcName, fileName)
 		let _additionalArgs = input(printf('%s::Run(): please input additional arguments for compiling: ', s:vimrcName))
 		call Compile(_additionalArgs)
@@ -117,25 +118,24 @@ function! Run(additionalArgs) " {{{2
 	elseif fileType == 'python' || fileType == 'vim'
 		call Compile(a:additionalArgs)
 		return
+	elseif fileType == 'tex'
+		" Show the pdf file
+		if s:isWin
+			let cmd = '!' . fileNameWithoutExtension . '.pdf'
+		else
+			let cmd = '!xdg-open ' . fileNameWithoutExtension . '.pdf'
+		endif
 	else
 		echohl Error
 		echom printf('%s::Run(): unrecognizable file type "%s"', s:vimrcName, fileType)
 		echohl None
 		return
 	endif
-"	TODO: install xelatex on my computer
-"	elseif fileType == 'tex'
-"		" Show the pdf file
-"		if s:isWin
-"			let cmd = '!' . fileNameWithoutExtension . '.pdf'
-"		else
-"			let cmd = '!xdg-open' . fileNameWithoutExtension . '.pdf'
-"		endif
-"	endif
 
 	if a:additionalArgs != ''
 		let cmd .= ' ' . a:additionalArgs
 	endif
+	echohl None
 	echom printf('%s::Run(): command is "%s"', s:vimrcName, cmd)
 	exec cmd
 endfunction
