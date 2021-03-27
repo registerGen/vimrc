@@ -1,0 +1,40 @@
+snippet gen_template "Generator's template"
+#include"testlib.h"
+
+const char* name="data/";
+const int T=;
+const int w=1e9;
+
+inline void open(int t){
+	fprintf(stderr,"open(): file name is %s%d.in\n",name,t);
+	char fname[100];
+	sprintf(fname,"%s%d.in",name,t);
+	freopen(fname,"w",stdout);
+}
+
+inline void val(int t){
+	fprintf(stderr,"val(): command is ./val <%s%d.in\n",name,t);
+	char cmd[100];
+	sprintf(cmd,"./val <%s%d.in",name,t);
+	system(cmd);
+}
+
+inline void genAns(int t){
+	fprintf(stderr,"genAns(): command is ./std <%s%d.in >%s%d.ans\n",name,t,name,t);
+	char cmd[100];
+	sprintf(cmd,"./std <%s%d.in >%s%d.ans",name,t,name,t);
+	system(cmd);
+}
+
+int main(int argc,char** argv){
+	registerGen(argc,argv,1);
+	for(int t=1;t<=T;t++){
+		open(t);
+		gen(t);
+		fclose(stdout);
+		val(t);
+		genAns(t);
+	}
+	return 0;
+}
+endsnippet
