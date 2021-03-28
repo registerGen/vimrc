@@ -34,6 +34,7 @@ int main(int argc,char** argv){
 		fclose(stdout);
 		val(t);
 		genAns(t);
+		fprintf(stderr,"\033[32m%s%d.in/.ans generated\033[0m\n",name,t);
 	}
 	return 0;
 }
