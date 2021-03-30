@@ -3,7 +3,6 @@ snippet gen_template "Generator's template"
 
 const char* name="data/";
 const int T=;
-const int w=1e9;
 
 inline void open(int t){
 	fprintf(stderr,"open(): file name is %s%d.in\n",name,t);
@@ -35,6 +34,25 @@ int main(int argc,char** argv){
 		val(t);
 		genAns(t);
 		fprintf(stderr,"\033[32m%s%d.in/.ans generated\033[0m\n",name,t);
+	}
+	return 0;
+}
+endsnippet
+
+snippet check
+#include<cstdio>
+#include<cstdlib>
+
+int main(){
+	int T=$1;
+	for(int i=1;i<=T;i++){
+		printf("Case #%d: ",i);
+		system("./tmpgen >tmp.in");
+		system("./brute <tmp.in >tmp.ans");
+		system("./std <tmp.in >tmp.out");
+		if(system("diff tmp.out tmp.ans >tmp.log"))
+			return puts("WA"),0;
+		puts("AC");
 	}
 	return 0;
 }
