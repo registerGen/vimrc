@@ -1,10 +1,8 @@
 snippet gen_template "Generator's template"
 #include"testlib.h"
 
-const char* name="data/";
-const int T=20;
-
-int a[N+10];
+const char* name="data/$1";
+const int T=${2:20};
 
 inline void open(int t){
 	fprintf(stderr,"open(): file name is %s%d.in\n",name,t);
