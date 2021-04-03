@@ -2,27 +2,38 @@ snippet gen_template "Generator's template"
 #include"testlib.h"
 
 const char* name="data/";
-const int T=;
+const int T=20;
+
+int a[N+10];
 
 inline void open(int t){
 	fprintf(stderr,"open(): file name is %s%d.in\n",name,t);
 	char fname[100];
 	sprintf(fname,"%s%d.in",name,t);
-	freopen(fname,"w",stdout);
+	if(freopen(fname,"w",stdout)==NULL){
+		fprintf(stderr,"\033[31mopen(): cannot open file\033[0m\n");
+		exit(0);
+	}
 }
 
 inline void val(int t){
 	fprintf(stderr,"val(): command is ./val <%s%d.in\n",name,t);
 	char cmd[100];
 	sprintf(cmd,"./val <%s%d.in",name,t);
-	system(cmd);
+	if(system(cmd)){
+		fprintf(stderr,"\033[31mval(): validation failed\033[0m\n");
+		exit(0);
+	}
 }
 
 inline void genAns(int t){
 	fprintf(stderr,"genAns(): command is ./std <%s%d.in >%s%d.ans\n",name,t,name,t);
 	char cmd[100];
 	sprintf(cmd,"./std <%s%d.in >%s%d.ans",name,t,name,t);
-	system(cmd);
+	if(system(cmd)){
+		fprintf(stderr,"\033[31mgenAns(): answer file generation failed\033[0m\n");
+		exit(0);
+	}
 }
 
 int main(int argc,char** argv){
@@ -37,6 +48,7 @@ int main(int argc,char** argv){
 	}
 	return 0;
 }
+
 endsnippet
 
 snippet check
