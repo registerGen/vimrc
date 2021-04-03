@@ -26,6 +26,7 @@ set ts=2 " tabstop
 set sw=2 " shiftwidth
 set cot-=preview " completeopt
 set fdm=marker " foldmethod
+set acd " autochdir
 if s:isGUI
 	if s:isWin
 		set gfn=Cascadia\ Code\ PL::h15 " guifont
