@@ -47,7 +47,7 @@ autocmd BufWrite,BufRead,BufNew * let b:compiled = 0
 function! CheckExecutable(executableName) " {{{2
 	if !executable(a:executableName)
 		echohl WarningMsg
-		echo printf('%s::CheckExecutable(): executable %s not found', s:vimrcName, a:executableName)
+		echo printf('%s::CheckExecutable(): executable "%s" not found', s:vimrcName, a:executableName)
 		echohl None
 		return 0
 	endif
@@ -175,8 +175,8 @@ function! Run(additionalArgs) " {{{2
 endfunction
 
 " Commands and mappings {{{2
-command! -nargs=* Compile :call Compile(<q-args>)
-command! -nargs=* Run :call Run(<q-args>)
+command! -nargs=* Compile call Compile(<q-args>)
+command! -nargs=* Run call Run(<q-args>)
 map <F9> :Compile<CR>
 map <F12> :Run<CR>
 imap <F9> <ESC>:Compile<CR>
@@ -245,3 +245,20 @@ endif
 
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsExpandTrigger . ' <C-R>=g:UltiSnips_Complete()<cr>'
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger . ' <C-R>=g:UltiSnips_Reverse()<cr>'
+
+" Section: Combination with https://github.com/xalanq/cf-tool (very rough and simple implementation) {{{1
+function! RunCFToolCommand(cmd) " {{{2
+	if CheckExecutable('cf')
+		echohl None
+		echom printf('%s::RunCFToolCommand: command is "%s"', s:vimrcName, a:cmd)
+		let output = systemlist(a:cmd)
+		for str in output
+			echom str
+		endfor
+	endif
+endfunction
+
+" Commands and mappings {{{2
+command! -nargs=* Gen call RunCFToolCommand('cf gen ' . <q-args>)
+command! -nargs=* Test call RunCFToolCommand('cf test ' . <q-args>)
+command! -nargs=* Submit call RunCFToolCommand('cf submit -f ' . expand('%') . ' ' . <q-args>)
