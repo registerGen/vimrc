@@ -123,6 +123,12 @@ function! Run(additionalArgs) " {{{2
 		if s:isWin
 			let cmd = '!' . fileNameWithoutExtension . '.pdf'
 		else
+			if !executable('xdg-open')
+				echohl WarningMsg
+				echo printf('%s::Run(): executabe xdg-open not found', s:vimrcName)
+				echohl None
+				return
+			endif
 			let cmd = '!xdg-open ' . fileNameWithoutExtension . '.pdf'
 		endif
 	else
