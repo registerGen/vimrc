@@ -44,6 +44,16 @@ syntax on
 let b:compiled = 0
 autocmd BufWrite,BufRead,BufNew * let b:compiled = 0
 
+function! CheckExecutable(executableName) " {{{2
+	if !executable(a:executableName)
+		echohl WarningMsg
+		echo printf('%s::CheckExecutable(): executable %s not found', s:vimrcName, a:executableName)
+		echohl None
+		return 0
+	endif
+	return 1
+endfunction
+
 function! Compile(additionalArgs) " {{{2
 	exec 'w'
 	let b:compiled = 1
@@ -57,19 +67,39 @@ function! Compile(additionalArgs) " {{{2
 	let cmd = ''
 
 	if fileType == 'cpp'
-		let cmd = '!g++ -Wall -Wextra -Wconversion -Wshadow -o ' . executableFileName . ' ' . fileName
+		if CheckExecutable('g++')
+			let cmd = '!g++ -Wall -Wextra -Wconversion -Wshadow -o ' . executableFileName . ' ' . fileName
+		else
+			return
+		endif
 	elseif fileType == 'c'
-		let cmd = '!gcc -Wall -Wextra -Wconversion -Wshadow -o ' . executableFileName . ' ' . fileName
+		if CheckExecutable('gcc')
+			let cmd = '!gcc -Wall -Wextra -Wconversion -Wshadow -o ' . executableFileName . ' ' . fileName
+		else
+			return
+		endif
 	elseif fileType == 'python'
 		if s:isWin
-			let cmd = '!python ' . fileName
+			if CheckExecutable('python')
+				let cmd = '!python ' . fileName
+			else
+				return
+			endif
 		else
-			let cmd = '!python3 ' . fileName
+			if CheckExecutable('python3')
+				let cmd = '!python3 ' . fileName
+			else
+				return
+			endif
 		endif
 	elseif fileType == 'vim'
 		let cmd = 'so ' . fileName
 	elseif fileType == 'tex'
-		let cmd = '!xelatex ' . fileName
+		if CheckExecutable('xelatex')
+			let cmd = '!xelatex ' . fileName
+		else
+			return
+		endif
 	else
 		echohl Error
 		echom printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType)
@@ -123,13 +153,11 @@ function! Run(additionalArgs) " {{{2
 		if s:isWin
 			let cmd = '!' . fileNameWithoutExtension . '.pdf'
 		else
-			if !executable('xdg-open')
-				echohl WarningMsg
-				echo printf('%s::Run(): executable xdg-open not found', s:vimrcName)
-				echohl None
+			if CheckExecutable('xdg-open')
+				let cmd = '!xdg-open ' . fileNameWithoutExtension . '.pdf'
+			else
 				return
 			endif
-			let cmd = '!xdg-open ' . fileNameWithoutExtension . '.pdf'
 		endif
 	else
 		echohl Error
@@ -147,8 +175,8 @@ function! Run(additionalArgs) " {{{2
 endfunction
 
 " Commands and mappings {{{2
-command -nargs=* Compile :call Compile(<q-args>)
-command -nargs=* Run :call Run(<q-args>)
+command! -nargs=* Compile :call Compile(<q-args>)
+command! -nargs=* Run :call Run(<q-args>)
 map <F9> :Compile<CR>
 map <F12> :Run<CR>
 imap <F9> <ESC>:Compile<CR>
