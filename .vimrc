@@ -125,7 +125,7 @@ function! Run(additionalArgs) " {{{2
 		else
 			if !executable('xdg-open')
 				echohl WarningMsg
-				echo printf('%s::Run(): executabe xdg-open not found', s:vimrcName)
+				echo printf('%s::Run(): executable xdg-open not found', s:vimrcName)
 				echohl None
 				return
 			endif
