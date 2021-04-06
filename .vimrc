@@ -37,8 +37,11 @@ endif
 filetype plugin on
 filetype indent on
 let g:tex_flavor = 'latex'
-syntax enable
-syntax on
+
+if &t_Co > 2 || s:isGUI
+	syntax enable
+	syntax on
+endif
 
 " Section: Compile and run codes {{{1
 let b:compiled = 0
@@ -177,10 +180,10 @@ endfunction
 " Commands and mappings {{{2
 command! -nargs=* Compile call Compile(<q-args>)
 command! -nargs=* Run call Run(<q-args>)
-map <F9> :Compile<CR>
-map <F12> :Run<CR>
-imap <F9> <ESC>:Compile<CR>
-imap <F12> <ESC>:Run<CR>
+noremap <silent> <F9> :Compile<CR>
+noremap <silent> <F12> :Run<CR>
+inoremap <silent> <F9> <ESC>:Compile<CR>
+inoremap <silent> <F12> <ESC>:Run<CR>
 
 " Section: Plugins {{{1
 " Subsection: Load Plugins {{{2
@@ -246,19 +249,43 @@ endif
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsExpandTrigger . ' <C-R>=g:UltiSnips_Complete()<cr>'
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger . ' <C-R>=g:UltiSnips_Reverse()<cr>'
 
-" Section: Combination with https://github.com/xalanq/cf-tool (very rough and simple implementation) {{{1
-function! RunCFToolCommand(cmd) " {{{2
+" Section: Combination with https://github.com/xalanq/cf-tool {{{1
+function! CF_gen() " {{{2
 	if CheckExecutable('cf')
-		echohl None
-		echom printf('%s::RunCFToolCommand: command is "%s"', s:vimrcName, a:cmd)
-		let output = systemlist(a:cmd)
-		for str in output
-			echom str
-		endfor
+		echom printf('%s::CF_gen(): command is "cf gen"', s:vimrcName)
+		let output = systemlist('cf gen')[-1]
+		if output !~ '^Generated! See'
+			echom printf('%s::CF_gen(): generation failed', s:vimrcName)
+		else
+			echom printf('%s::CF_gen(): generated file name is "%s"', s:vimrcName, split(output)[-1])
+		endif
 	endif
 endfunction
 
-" Commands and mappings {{{2
-command! -nargs=* Gen call RunCFToolCommand('cf gen ' . <q-args>)
-command! -nargs=* Test call RunCFToolCommand('cf test ' . <q-args>)
-command! -nargs=* Submit call RunCFToolCommand('cf submit -f ' . expand('%') . ' ' . <q-args>)
+function! CF_test() " {{{2
+	if CheckExecutable('cf')
+		echom printf('%s::CF_test(): command is "cf test"', s:vimrcName)
+		let output = systemlist('cf test')
+		for str in output
+			" Because of YCM, I will not consider compilation errors
+			if str =~ '^Passed #[1-9][0-9]*'
+				let sampleID = str2nr(split(str)[1][1:])
+				echohl Type " In colorscheme desert (in terminal) or evening (in GUI), highlight group 'Type' is green
+				echom printf('%s::CF_test(): passed sample #%d', s:vimrcName, sampleID)
+				echohl None
+			elseif str =~ '^Failed #[1-9][0-9]*'
+				let sampleID = str2nr(split(str)[1][1:])
+				echohl WarningMsg
+				echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
+				echohl None
+				" Show diff between output and answer
+				echom shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+				call system(shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID)))
+				silent exec 'sp ' . printf('in%d.txt', sampleID)
+				silent exec 'vsp ' . printf('out%d.txt', sampleID)
+				silent exec 'vertical diffsp ' . printf('ans%d.txt', sampleID)
+				echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
+			endif
+		endfor
+	endif
+endfunction
