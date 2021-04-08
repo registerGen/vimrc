@@ -289,10 +289,7 @@ function! CF_test() " {{{2
 				echohl WarningMsg
 				echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
 				echohl None
-				" Show diff between output and answer
-				" FIXME: output not generated
-				echom shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
-				echom system(shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID)))
+				call system(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
 				silent exec 'sp ' . printf('in%d.txt', sampleID)
 				silent exec 'vsp ' . printf('out%d.txt', sampleID)
 				silent exec 'vertical diffsp ' . printf('ans%d.txt', sampleID)
