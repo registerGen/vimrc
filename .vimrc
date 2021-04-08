@@ -7,6 +7,7 @@ if s:isWin
 else
 	let s:vimrcName = '.vimrc'
 endif
+let mapleader = '_'
 
 " Section: UI settings {{{1
 if s:isGUI
@@ -41,6 +42,15 @@ let g:tex_flavor = 'latex'
 if &t_Co > 2 || s:isGUI
 	syntax enable
 	syntax on
+endif
+
+" Section: Mappings {{{1
+if s:isWin
+	silent noremap <leader>ev :e ~\_vimrc<CR>
+	silent noremap <leader>sv :so ~\_vimrc<CR>
+else
+	silent noremap <leader>ev :e ~/.vimrc<CR>
+	silent noremap <leader>sv :so ~/.vimrc<CR>
 endif
 
 " Section: Compile and run codes {{{1
@@ -282,7 +292,7 @@ function! CF_test() " {{{2
 				" Show diff between output and answer
 				" FIXME: output not generated
 				echom shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
-				call system(shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID)))
+				echom system(shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID)))
 				silent exec 'sp ' . printf('in%d.txt', sampleID)
 				silent exec 'vsp ' . printf('out%d.txt', sampleID)
 				silent exec 'vertical diffsp ' . printf('ans%d.txt', sampleID)
