@@ -58,7 +58,7 @@ function! CheckExecutable(executableName) " {{{2
 endfunction
 
 function! Compile(additionalArgs) " {{{2
-	exec 'w'
+	silent exec 'w'
 	let b:compiled = 1
 	let fileName = expand('%')
 	if s:isWin
@@ -258,6 +258,7 @@ function! CF_gen() " {{{2
 			echom printf('%s::CF_gen(): generation failed', s:vimrcName)
 		else
 			echom printf('%s::CF_gen(): generated file name is "%s"', s:vimrcName, split(output)[-1])
+			silent exec 'e ' . split(output)[-1]
 		endif
 	endif
 endfunction
@@ -279,6 +280,7 @@ function! CF_test() " {{{2
 				echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
 				echohl None
 				" Show diff between output and answer
+				" FIXME: output not generated
 				echom shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
 				call system(shellescape(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID)))
 				silent exec 'sp ' . printf('in%d.txt', sampleID)
