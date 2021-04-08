@@ -45,13 +45,39 @@ if &t_Co > 2 || s:isGUI
 endif
 
 " Section: Mappings {{{1
+" Edit and source vimrc {{{2
 if s:isWin
-	silent noremap <leader>ev :e ~\_vimrc<CR>
-	silent noremap <leader>sv :so ~\_vimrc<CR>
+	noremap <silent> <leader>ev :e ~\_vimrc<CR>
+	noremap <silent> <leader>sv :so ~\_vimrc<CR>
 else
-	silent noremap <leader>ev :e ~/.vimrc<CR>
-	silent noremap <leader>sv :so ~/.vimrc<CR>
+	noremap <silent> <leader>ev :e ~/.vimrc<CR>
+	noremap <silent> <leader>sv :so ~/.vimrc<CR>
 endif
+
+" Use the damn hjkl!!! {{{2
+noremap <UP> <NOP>
+noremap <DOWN> <NOP>
+noremap <LEFT> <NOP>
+noremap <RIGHT> <NOP>
+inoremap <UP> <NOP>
+inoremap <DOWN> <NOP>
+inoremap <LEFT> <NOP>
+inoremap <RIGHT> <NOP>
+
+" Compile and run codes {{{2
+noremap <silent> <F10> :Compile<CR>
+noremap <silent> <F12> :Run<CR>
+inoremap <silent> <F10> <ESC>:Compile<CR>
+inoremap <silent> <F12> <ESC>:Run<CR>
+
+" NERDTree {{{2
+map <silent> <F9> :NERDTreeToggle<CR>
+imap <silent> <F9> <ESC><F7>
+
+" Combination with cf-tool {{{2
+noremap <silent> <F5> :call CF_gen()<CR>
+noremap <silent> <F6> :call CF_test()<CR>
+"noremap <silent> <F7> :call CF_submit()<CR>
 
 " Section: Compile and run codes {{{1
 let b:compiled = 0
@@ -187,13 +213,9 @@ function! Run(additionalArgs) " {{{2
 	exec cmd
 endfunction
 
-" Commands and mappings {{{2
+" Commands {{{2
 command! -nargs=* Compile call Compile(<q-args>)
 command! -nargs=* Run call Run(<q-args>)
-noremap <silent> <F9> :Compile<CR>
-noremap <silent> <F12> :Run<CR>
-inoremap <silent> <F9> <ESC>:Compile<CR>
-inoremap <silent> <F12> <ESC>:Run<CR>
 
 " Section: Plugins {{{1
 " Subsection: Load Plugins {{{2
@@ -219,8 +241,6 @@ let g:NERDTreeExactMatchHighlightFullName = 1
 let g:NERDTreePatternMatchHighlightFullName = 1
 let g:NERDTreeHighlightFolders = 1
 let g:NERDTreeHighlightFoldersFullName = 1
-map <F7> :NERDTreeToggle<CR>
-imap <F7> <ESC><F7>
 
 " Subsection: Airline {{{2
 let g:airline_theme = 'term'
@@ -265,7 +285,9 @@ function! CF_gen() " {{{2
 		echom printf('%s::CF_gen(): command is "cf gen"', s:vimrcName)
 		let output = systemlist('cf gen')[-1]
 		if output !~ '^Generated! See'
+			echohl WarningMsg
 			echom printf('%s::CF_gen(): generation failed', s:vimrcName)
+			echohl None
 		else
 			echom printf('%s::CF_gen(): generated file name is "%s"', s:vimrcName, split(output)[-1])
 			silent exec 'e ' . split(output)[-1]
