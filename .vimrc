@@ -7,7 +7,6 @@ if s:isWin
 else
 	let s:vimrcName = '.vimrc'
 endif
-let mapleader = '_'
 
 " Section: UI settings {{{1
 if s:isGUI
@@ -45,6 +44,7 @@ if &t_Co > 2 || s:isGUI
 endif
 
 " Section: Mappings {{{1
+let mapleader = '_'
 " Edit and source vimrc {{{2
 if s:isWin
 	noremap <silent> <leader>ev :e ~\_vimrc<CR>
@@ -75,9 +75,9 @@ map <silent> <F9> :NERDTreeToggle<CR>
 imap <silent> <F9> <ESC><F7>
 
 " Combination with cf-tool {{{2
-noremap <silent> <F5> :call CF_gen()<CR>
-noremap <silent> <F6> :call CF_test()<CR>
-"noremap <silent> <F7> :call CF_submit()<CR>
+noremap <silent> <leader>g :call CF_gen()<CR>
+noremap <silent> <leader>t :call CF_test()<CR>
+"noremap <silent> <leader>s :call CF_submit()<CR>
 
 " Section: Compile and run codes {{{1
 let b:compiled = 0
@@ -118,18 +118,12 @@ function! Compile(additionalArgs) " {{{2
 			return
 		endif
 	elseif fileType == 'python'
-		if s:isWin
-			if CheckExecutable('python')
-				let cmd = '!python ' . fileName
-			else
-				return
-			endif
+		if CheckExecutable('python')
+			let cmd = '!python ' . fileName
+		elseif CheckExecutable('python3')
+			let cmd = '!python3 ' . fileName
 		else
-			if CheckExecutable('python3')
-				let cmd = '!python3 ' . fileName
-			else
-				return
-			endif
+			return
 		endif
 	elseif fileType == 'vim'
 		let cmd = 'so ' . fileName
@@ -311,7 +305,11 @@ function! CF_test() " {{{2
 				echohl WarningMsg
 				echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
 				echohl None
-				call system(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+				if s:isWin
+					call system(printf('%s.exe <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+				else
+					call system(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+				endif
 				silent exec 'sp ' . printf('in%d.txt', sampleID)
 				silent exec 'vsp ' . printf('out%d.txt', sampleID)
 				silent exec 'vertical diffsp ' . printf('ans%d.txt', sampleID)
