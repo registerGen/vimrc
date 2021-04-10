@@ -94,7 +94,7 @@ function! CheckExecutable(executableName) " {{{2
 endfunction
 
 function! Compile(additionalArgs) " {{{2
-	silent exec 'w'
+	exec 'silent w'
 	let b:compiled = 1
 	let fileName = expand('%')
 	if s:isWin
@@ -273,7 +273,9 @@ endif
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsExpandTrigger . ' <C-R>=g:UltiSnips_Complete()<cr>'
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger . ' <C-R>=g:UltiSnips_Reverse()<cr>'
 
-" Section: Combination with https://github.com/xalanq/cf-tool {{{1
+" Section: Combination with cf tool (https://github.com/xalanq/cf-tool) {{{1
+let s:CF_DiffWindowOpened = 0
+
 function! CF_gen() " {{{2
 	if CheckExecutable('cf')
 		echom printf('%s::CF_gen(): command is "cf gen"', s:vimrcName)
@@ -284,8 +286,43 @@ function! CF_gen() " {{{2
 			echohl None
 		else
 			echom printf('%s::CF_gen(): generated file name is "%s"', s:vimrcName, split(output)[-1])
-			silent exec 'e ' . split(output)[-1]
+			exec 'silent e ' . split(output)[-1]
+			echom printf('%s::CF_gen(): file "%s" opened', s:vimrcName, split(output)[-1])
 		endif
+	endif
+endfunction
+
+function! CF_ToggleDiffWindow(sampleID) " {{{2
+	if type(a:sampleID) == 1
+		let sampleID = str2nr(a:sampleID)
+	elseif type(a:sampleID) == 0
+		let sampleID = a:sampleID
+	else
+		echohl Error
+		echom printf('%s::CF_ToggleDiffWindow(): argument type not correct', s:vimrcName)
+		echohl None
+	endif
+	let files = [printf('in%d.txt', sampleID), printf('out%d.txt', sampleID), printf('ans%d.txt', sampleID)]
+	for file in files
+		if buflisted(file)
+			exec printf('silent bdelete %d', bufnr(file))
+		endif
+	endfor
+	if s:CF_DiffWindowOpened
+		let s:CF_DiffWindowOpened = 0
+	else
+		for file in files
+			if !filereadable(file)
+				echohl Error
+				echom printf('%s::CF_ToggleDiffWindow(): file %s not found', s:vimrcName, file)
+				echohl None
+				return
+			endif
+		endfor
+		exec 'silent sp ' . printf('in%d.txt', sampleID)
+		exec 'silent vsp ' . printf('out%d.txt', sampleID)
+		exec 'silent vertical diffsp ' . printf('ans%d.txt', sampleID)
+		let s:CF_DiffWindowOpened = 1
 	endif
 endfunction
 
@@ -310,11 +347,12 @@ function! CF_test() " {{{2
 				else
 					call system(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
 				endif
-				silent exec 'sp ' . printf('in%d.txt', sampleID)
-				silent exec 'vsp ' . printf('out%d.txt', sampleID)
-				silent exec 'vertical diffsp ' . printf('ans%d.txt', sampleID)
+				call CF_ToggleDiffWindow(sampleID)
 				echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
 			endif
 		endfor
 	endif
 endfunction
+
+" Commands {{{2
+command! -nargs=1 CFToggleDiffWindow call CF_ToggleDiffWindow(<f-args>)
