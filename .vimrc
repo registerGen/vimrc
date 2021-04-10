@@ -75,24 +75,37 @@ map <silent> <F9> :NERDTreeToggle<CR>
 imap <silent> <F9> <ESC><F7>
 
 " Combination with cf-tool {{{2
-noremap <silent> <leader>g :call CF_gen()<CR>
-noremap <silent> <leader>t :call CF_test()<CR>
+noremap <silent> <leader>g :call CF_Gen()<CR>
+noremap <silent> <leader>t :call CF_Test()<CR>
 noremap <silent> <leader>T :call CF_ToggleDiffWindow()<CR>
-"noremap <silent> <leader>s :call CF_submit()<CR>
+"noremap <silent> <leader>s :call CF_Submit()<CR>
+noremap <silent> <leader>a :call CF_AddSample()<CR>
 
-" Section: Compile and run codes {{{1
-let b:compiled = 0
-autocmd BufWrite,BufRead,BufNew * let b:compiled = 0
-
+" Section: Helper functions {{{1
 function! CheckExecutable(executableName) " {{{2
 	if !executable(a:executableName)
-		echohl WarningMsg
-		echo printf('%s::CheckExecutable(): executable "%s" not found', s:vimrcName, a:executableName)
-		echohl None
+		call EchoWarning(printf('%s::CheckExecutable(): executable "%s" not found', s:vimrcName, a:executableName))
 		return 0
 	endif
 	return 1
 endfunction
+
+function! EchoWarning(msg) " {{{2
+	echohl WarningMsg
+	echom a:msg
+	echohl None
+endfunction
+
+function! EchoError(msg) " {{{2
+	echohl Error
+	echom a:msg
+	echohl None
+endfunction
+
+
+" Section: Compile and run codes {{{1
+let b:compiled = 0
+autocmd BufWrite,BufRead,BufNew * let b:compiled = 0
 
 function! Compile(additionalArgs) " {{{2
 	exec 'silent w'
@@ -135,9 +148,7 @@ function! Compile(additionalArgs) " {{{2
 			return
 		endif
 	else
-		echohl Error
-		echom printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType)
-		echohl None
+		call EchoError(printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType))
 		return
 	endif
 
@@ -161,9 +172,7 @@ function! Run(additionalArgs) " {{{2
 	let cmd = ''
 
 	if &modified == 1
-		echohl WarningMsg
-		echom printf('%s::Run(): file "%s" not saved', s:vimrcName, fileName)
-		echohl None
+		call EchoWarning(printf('%s::Run(): file "%s" not saved', s:vimrcName, fileName))
 		return
 	endif
 	if b:compiled == 0
@@ -194,9 +203,7 @@ function! Run(additionalArgs) " {{{2
 			endif
 		endif
 	else
-		echohl Error
-		echom printf('%s::Run(): unrecognizable file type "%s"', s:vimrcName, fileType)
-		echohl None
+		call EchoError(printf('%s::Run(): unrecognizable file type "%s"', s:vimrcName, fileType))
 		return
 	endif
 
@@ -277,16 +284,14 @@ autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger
 " Section: Combination with cf tool (https://github.com/xalanq/cf-tool) {{{1
 let s:CF_DiffWindowOpened = 0
 
-function! CF_gen() " {{{2
+function! CF_Gen() " {{{2
 	if CheckExecutable('cf')
 		echom printf('%s::CF_gen(): command is "cf gen"', s:vimrcName)
 		let output = systemlist('cf gen')[-1]
 		if output !~ '^Generated! See'
-			echohl WarningMsg
-			echom printf('%s::CF_gen(): generation failed', s:vimrcName)
-			echohl None
+			call EchoError(printf('%s::CF_gen(): generation failed', s:vimrcName))
 		else
-			echom printf('%s::CF_gen(): generated file name is "%s"', s:vimrcName, split(output)[-1])
+			echom printf('%s::CF_gen(): generated name is "%s"', s:vimrcName, split(output)[-1])
 			exec 'silent e ' . split(output)[-1]
 			echom printf('%s::CF_gen(): file "%s" opened', s:vimrcName, split(output)[-1])
 		endif
@@ -294,40 +299,38 @@ function! CF_gen() " {{{2
 endfunction
 
 function! CF_ToggleDiffWindow(sampleID) " {{{2
-	if type(a:sampleID) == 1
-		let sampleID = str2nr(a:sampleID)
-	elseif type(a:sampleID) == 0
-		let sampleID = a:sampleID
-	else
-		echohl Error
-		echom printf('%s::CF_ToggleDiffWindow(): argument type not correct', s:vimrcName)
-		echohl None
-	endif
-	let files = [printf('in%d.txt', sampleID), printf('out%d.txt', sampleID), printf('ans%d.txt', sampleID)]
-	for file in files
-		if buflisted(file)
-			exec printf('silent bdelete %d', bufnr(file))
+	if CheckExecutable('cf')
+		if type(a:sampleID) == 1
+			let sampleID = str2nr(a:sampleID)
+		elseif type(a:sampleID) == 0
+			let sampleID = a:sampleID
+		else
+			call EchoError(printf('%s::CF_ToggleDiffWindow(): argument type not correct', s:vimrcName))
 		endif
-	endfor
-	if s:CF_DiffWindowOpened
-		let s:CF_DiffWindowOpened = 0
-	else
+		let files = [printf('in%d.txt', sampleID), printf('out%d.txt', sampleID), printf('ans%d.txt', sampleID)]
 		for file in files
-			if !filereadable(file)
-				echohl Error
-				echom printf('%s::CF_ToggleDiffWindow(): file %s not found', s:vimrcName, file)
-				echohl None
-				return
+			if buflisted(file)
+				exec printf('silent bdelete %d', bufnr(file))
 			endif
 		endfor
-		exec 'silent sp ' . files[0]
-		exec 'silent vsp ' . files[1]
-		exec 'silent vertical diffsp ' . files[2]
-		let s:CF_DiffWindowOpened = 1
+		if s:CF_DiffWindowOpened
+			let s:CF_DiffWindowOpened = 0
+		else
+			for file in files
+				if !filereadable(file)
+					call EchoError(printf('%s::CF_ToggleDiffWindow(): file %s not found', s:vimrcName, file))
+					return
+				endif
+			endfor
+			exec 'silent sp ' . files[0]
+			exec 'silent vsp ' . files[1]
+			exec 'silent vertical diffsp ' . files[2]
+			let s:CF_DiffWindowOpened = 1
+		endif
 	endif
 endfunction
 
-function! CF_test() " {{{2
+function! CF_Test() " {{{2
 	if CheckExecutable('cf')
 		echom printf('%s::CF_test(): command is "cf test"', s:vimrcName)
 		let output = systemlist('cf test')
@@ -352,6 +355,19 @@ function! CF_test() " {{{2
 				echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
 			endif
 		endfor
+	endif
+endfunction
+
+function! CF_AddSample() " {{{2
+	if CheckExecutable('cf')
+		let fileList = systemlist('ls in*.txt ans*.txt')
+		let maxSampleID = 0
+		for file in fileList
+			let maxSampleID = max([maxSampleID, str2nr(matchstrpos(file, '\d\+')[0])])
+		endfor
+		exec printf('silent sp in%d.txt', maxSampleID + 1)
+		exec printf('silent vsp ans%d.txt', maxSampleID + 1)
+		echom printf('%s::CF_AddSample(): generated files are "in%d.txt" and "ans%d.txt"', s:vimrcName, maxSampleID + 1, maxSampleID + 1)
 	endif
 endfunction
 
