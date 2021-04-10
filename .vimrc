@@ -77,6 +77,7 @@ imap <silent> <F9> <ESC><F7>
 " Combination with cf-tool {{{2
 noremap <silent> <leader>g :call CF_gen()<CR>
 noremap <silent> <leader>t :call CF_test()<CR>
+noremap <silent> <leader>T :call CF_ToggleDiffWindow()<CR>
 "noremap <silent> <leader>s :call CF_submit()<CR>
 
 " Section: Compile and run codes {{{1
@@ -311,48 +312,51 @@ function! CF_ToggleDiffWindow(sampleID) " {{{2
 	if s:CF_DiffWindowOpened
 		let s:CF_DiffWindowOpened = 0
 	else
-		for file in files
-			if !filereadable(file)
-				echohl Error
-				echom printf('%s::CF_ToggleDiffWindow(): file %s not found', s:vimrcName, file)
-				echohl None
-				return
-			endif
-		endfor
-		exec 'silent sp ' . printf('in%d.txt', sampleID)
-		exec 'silent vsp ' . printf('out%d.txt', sampleID)
-		exec 'silent vertical diffsp ' . printf('ans%d.txt', sampleID)
-		let s:CF_DiffWindowOpened = 1
-	endif
-endfunction
-
-function! CF_test() " {{{2
-	if CheckExecutable('cf')
-		echom printf('%s::CF_test(): command is "cf test"', s:vimrcName)
-		let output = systemlist('cf test')
-		for str in output
-			" Because of YCM, I will not consider compilation errors
-			if str =~ '^Passed #[1-9][0-9]*'
-				let sampleID = str2nr(split(str)[1][1:])
-				echohl Type " In colorscheme desert (in terminal) or evening (in GUI), highlight group 'Type' is green
-				echom printf('%s::CF_test(): passed sample #%d', s:vimrcName, sampleID)
-				echohl None
-			elseif str =~ '^Failed #[1-9][0-9]*'
-				let sampleID = str2nr(split(str)[1][1:])
-				echohl WarningMsg
-				echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
-				echohl None
-				if s:isWin
-					call system(printf('%s.exe <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
-				else
-					call system(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+		if s:CF_DiffWindowOpened
+			let s:CF_DiffWindowOpened = 0
+		else
+			for file in files
+				if !filereadable(file)
+					echohl Error
+					echom printf('%s::CF_ToggleDiffWindow(): file %s not found', s:vimrcName, file)
+					echohl None
+					return
 				endif
-				call CF_ToggleDiffWindow(sampleID)
-				echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
-			endif
-		endfor
-	endif
-endfunction
+			endfor
+			exec 'silent sp ' . files[0]
+			exec 'silent vsp ' . files[1]
+			exec 'silent vertical diffsp ' . files[2]
+			let s:CF_DiffWindowOpened = 1
+		endif
+	endfunction
 
-" Commands {{{2
-command! -nargs=1 CFToggleDiffWindow call CF_ToggleDiffWindow(<f-args>)
+	function! CF_test() " {{{2
+		if CheckExecutable('cf')
+			echom printf('%s::CF_test(): command is "cf test"', s:vimrcName)
+			let output = systemlist('cf test')
+			for str in output
+				" Because of YCM, I will not consider compilation errors
+				if str =~ '^Passed #[1-9][0-9]*'
+					let sampleID = str2nr(split(str)[1][1:])
+					echohl Type " In colorscheme desert (in terminal) or evening (in GUI), highlight group 'Type' is green
+					echom printf('%s::CF_test(): passed sample #%d', s:vimrcName, sampleID)
+					echohl None
+				elseif str =~ '^Failed #[1-9][0-9]*'
+					let sampleID = str2nr(split(str)[1][1:])
+					echohl WarningMsg
+					echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
+					echohl None
+					if s:isWin
+						call system(printf('%s.exe <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+					else
+						call system(printf('./%s <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
+					endif
+					call CF_ToggleDiffWindow(sampleID)
+					echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
+				endif
+			endfor
+		endif
+	endfunction
+
+	" Commands {{{2
+	command! -nargs=1 CFToggleDiffWindow call CF_ToggleDiffWindow(<f-args>)
