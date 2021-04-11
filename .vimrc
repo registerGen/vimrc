@@ -132,10 +132,10 @@ function! Compile(additionalArgs) " {{{2
 			return
 		endif
 	elseif fileType == 'python'
-		if CheckExecutable('python')
-			let cmd = '!python ' . fileName
-		elseif CheckExecutable('python3')
+		if CheckExecutable('python3')
 			let cmd = '!python3 ' . fileName
+		elseif CheckExecutable('python')
+			let cmd = '!python ' . fileName
 		else
 			return
 		endif
