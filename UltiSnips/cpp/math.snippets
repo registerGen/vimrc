@@ -1,0 +1,21 @@
+snippet gcd "Math - greatest common divisor"
+inline ${1:int} gcd($1 x,$1 y){return !y?x:gcd(y,x%y);}
+endsnippet
+
+snippet gauss "Math - Gauss-Jordan Elimination"
+bool Gauss(){
+	for(int i=1;i<=n;i++){
+		int t=i;
+		for(int j=i+1;j<=n;j++)
+			if(fabs(a[j][i])>fabs(a[t][i]))t=j;
+		if(fabs(a[t][i])<eps)return 0;
+		std::swap(a[i],a[t]);
+		for(int j=1;j<=n;j++){
+			if(i==j)continue;
+			double r=-a[j][i]/a[i][i];
+			for(int k=i;k<=n+1;k++)a[j][k]+=r*a[i][k];
+		}
+	}
+	return 1;
+}
+endsnippet
