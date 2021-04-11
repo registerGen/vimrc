@@ -78,8 +78,8 @@ imap <silent> <F9> <ESC><F7>
 noremap <silent> <leader>g :call CF_Gen()<CR>
 noremap <silent> <leader>t :call CF_Test()<CR>
 noremap <silent> <leader>T :call CF_ToggleDiffWindow()<CR>
-"noremap <silent> <leader>s :call CF_Submit()<CR>
 noremap <silent> <leader>a :call CF_AddSample()<CR>
+noremap <silent> <leader>s :call CF_Submit()<CR>
 
 " Section: Helper functions {{{1
 function! CheckExecutable(executableName) " {{{2
@@ -336,15 +336,15 @@ function! CF_Test() " {{{2
 		let output = systemlist('cf test')
 		for str in output
 			" Because of YCM, I will not consider compilation errors
-			if str =~ '^Passed #[1-9][0-9]*'
+			if str =~ '^Passed #\d\+'
 				let sampleID = str2nr(split(str)[1][1:])
 				echohl Type " In colorscheme desert (in terminal) or evening (in GUI), highlight group 'Type' is green
-				echom printf('%s::CF_test(): passed sample #%d', s:vimrcName, sampleID)
+				echom printf('%s::CF_test(): sample #%d AC', s:vimrcName, sampleID)
 				echohl None
-			elseif str =~ '^Failed #[1-9][0-9]*'
+			elseif str =~ '^Failed #\d\+'
 				let sampleID = str2nr(split(str)[1][1:])
-				echohl WarningMsg
-				echom printf('%s::CF_test(): failed sample #%d', s:vimrcName, sampleID)
+				echohl WarningMsg " Red
+				echom printf('%s::CF_test(): sample #%d WA', s:vimrcName, sampleID)
 				echohl None
 				if s:isWin
 					call system(printf('%s.exe <in%d.txt >out%d.txt', expand('%<'), sampleID, sampleID))
@@ -353,6 +353,11 @@ function! CF_Test() " {{{2
 				endif
 				call CF_ToggleDiffWindow(sampleID)
 				echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
+			elseif str =~ '^Runtime Error #\d\+'
+				let sampleID = str2nr(split(str)[2][1:])
+				echohl PreProc " Purple
+				echom printf('%s::CF_test(): sample #%d RE (%s)', s:vimrcName, sampleID, join(split(str)[4:]))
+				echohl None
 			endif
 		endfor
 	endif
@@ -371,5 +376,28 @@ function! CF_AddSample() " {{{2
 	endif
 endfunction
 
+function! CF_Submit(...) " {{{2
+	if CheckExecutable('cf')
+		let cmd = ''
+		if a:0 == 0
+			let cmd = 'cf submit'
+		elseif a:0 == 1
+			let problemID = matchstrpos(a:1, '^\d\+[A-Za-z]$')[0]
+			if problemID == ''
+				call EchoError(printf('%s::CF_Submit(): unrecognized problem ID', s:vimrcName))
+				return
+			else
+				let cmd = 'cf submit ' . problemID
+			endif
+		endif
+		if !has('terminal')
+			exec '!' . cmd
+		else
+			exec 'vertical term ' . cmd
+		endif
+	endif
+endfunction
+
 " Commands {{{2
 command! -nargs=1 CFToggleDiffWindow call CF_ToggleDiffWindow(<f-args>)
+command! -nargs=1 CFSubmit call CF_Submit(<f-args>)
