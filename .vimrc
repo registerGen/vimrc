@@ -71,8 +71,8 @@ inoremap <silent> <F10> <ESC>:Compile<CR>
 inoremap <silent> <F12> <ESC>:Run<CR>
 
 " NERDTree {{{2
-map <silent> <F9> :NERDTreeToggle<CR>
-imap <silent> <F9> <ESC><F7>
+noremap <silent> <F9> :NERDTreeToggle<CR>
+inoremap <silent> <F9> <ESC><F7>
 
 " Combination with cf-tool {{{2
 noremap <silent> <leader>g :call CF_Gen()<CR>
@@ -101,7 +101,6 @@ function! EchoError(msg) " {{{2
 	echom a:msg
 	echohl None
 endfunction
-
 
 " Section: Compile and run codes {{{1
 let b:compiled = 0
