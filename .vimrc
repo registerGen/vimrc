@@ -234,6 +234,7 @@ call plug#end()
 " Subsection: Rainbow {{{2
 let g:rainbow_active = 1
 
+
 " Subsection: NERDTree {{{2
 let g:NERDTreeShowBookmarks = 1
 let g:NERDTreeShowHidden = 1
@@ -245,6 +246,7 @@ let g:NERDTreeHighlightFoldersFullName = 1
 
 " Subsection: Airline {{{2
 let g:airline_theme = 'term'
+let g:airline_section_b = '%{strftime("%c")}'
 
 " Subsection: YCM & Ultisnips (from https://blog.csdn.net/qq_20336817/article/details/51115411) {{{2
 function! g:UltiSnips_Complete()
@@ -352,11 +354,13 @@ function! CF_Test() " {{{2
 				endif
 				call CF_ToggleDiffWindow(sampleID)
 				echom printf('%s::CF_test(): diff is shown above', s:vimrcName)
+				return
 			elseif str =~ '^Runtime Error #\d\+'
 				let sampleID = str2nr(split(str)[2][1:])
 				echohl PreProc " Purple
 				echom printf('%s::CF_test(): sample #%d RE (%s)', s:vimrcName, sampleID, join(split(str)[4:]))
 				echohl None
+				return
 			endif
 		endfor
 	endif
@@ -388,6 +392,9 @@ function! CF_Submit(...) " {{{2
 			else
 				let cmd = 'cf submit ' . problemID
 			endif
+		else
+			call EchoError(printf('%s::CF_Submit(): argc != 0 or argc != 1', s:vimrcName))
+			return
 		endif
 		if !has('terminal')
 			exec '!' . cmd
