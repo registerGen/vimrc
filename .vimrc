@@ -234,7 +234,6 @@ call plug#end()
 " Subsection: Rainbow {{{2
 let g:rainbow_active = 1
 
-
 " Subsection: NERDTree {{{2
 let g:NERDTreeShowBookmarks = 1
 let g:NERDTreeShowHidden = 1
@@ -246,7 +245,6 @@ let g:NERDTreeHighlightFoldersFullName = 1
 
 " Subsection: Airline {{{2
 let g:airline_theme = 'term'
-let g:airline_section_b = '%{strftime("%c")}'
 
 " Subsection: YCM & Ultisnips (from https://blog.csdn.net/qq_20336817/article/details/51115411) {{{2
 function! g:UltiSnips_Complete()
