@@ -61,8 +61,8 @@ int main(){
 		system("./brute <tmp.in >tmp.ans");
 		system("./std <tmp.in >tmp.out");
 		if(system("diff tmp.out tmp.ans >tmp.log"))
-			return puts("WA"),0;
-		puts("AC");
+			return puts("\033[31mWA\033[0m"),0;
+		puts("\033[32mAC\033[0m");
 	}
 	return 0;
 }
