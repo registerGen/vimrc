@@ -16,7 +16,7 @@ else
 endif
 set nobk " nobackup
 set noswf " noswapfile
-set enc=utf-8 " encoding
+set enc=utf8 " encoding
 set bs=eol,start,indent " backspace
 set nu " number
 set ru " ruler
@@ -45,6 +45,7 @@ endif
 
 " Section: Mappings {{{1
 let mapleader = '_'
+let maplocalleader = mapleader
 " Edit and source vimrc {{{2
 if s:isWin
 	noremap <silent> <leader>ev :e ~\_vimrc<CR>
@@ -115,7 +116,7 @@ function! Compile(additionalArgs) " {{{2
 	else
 		let executableFileName = expand('%<')
 	endif
-	let fileType = &filetype
+	let fileType = &ft
 	let cmd = ''
 
 	if fileType == 'cpp'
@@ -140,12 +141,6 @@ function! Compile(additionalArgs) " {{{2
 		endif
 	elseif fileType == 'vim'
 		let cmd = 'so ' . fileName
-	elseif fileType == 'tex'
-		if CheckExecutable('xelatex')
-			let cmd = '!xelatex ' . fileName
-		else
-			return
-		endif
 	else
 		call EchoError(printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType))
 		return
@@ -190,17 +185,6 @@ function! Run(additionalArgs) " {{{2
 	elseif fileType == 'python' || fileType == 'vim'
 		call Compile(a:additionalArgs)
 		return
-	elseif fileType == 'tex'
-		" Show the pdf file
-		if s:isWin
-			let cmd = '!' . fileNameWithoutExtension . '.pdf'
-		else
-			if CheckExecutable('xdg-open')
-				let cmd = '!xdg-open ' . fileNameWithoutExtension . '.pdf'
-			else
-				return
-			endif
-		endif
 	else
 		call EchoError(printf('%s::Run(): unrecognizable file type "%s"', s:vimrcName, fileType))
 		return
@@ -229,6 +213,7 @@ Plug 'ycm-core/YouCompleteMe'
 Plug 'SirVer/ultisnips'
 Plug 'vim/killersheep'
 Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown'}
+Plug 'lervag/vimtex'
 call plug#end()
 
 " Subsection: Rainbow {{{2
@@ -279,6 +264,16 @@ endif
 
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsExpandTrigger . ' <C-R>=g:UltiSnips_Complete()<cr>'
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger . ' <C-R>=g:UltiSnips_Reverse()<cr>'
+
+" Subsection: Pathogen {{{2
+execute pathogen#infect('~/projects/vim_plugins/{}')
+
+" Subsection: VimTex {{{2
+let g:vimtex_view_enabled = 0
+if !exists('g:ycm_semantic_triggers')
+	let g:ycm_semantic_triggers = {}
+endif
+autocmd VimEnter * let g:ycm_semantic_triggers.tex = g:vimtex#re#youcompleteme
 
 " Section: Combination with cf tool (https://github.com/xalanq/cf-tool) {{{1
 let s:CF_DiffWindowOpened = 0
