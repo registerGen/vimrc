@@ -1,21 +1,90 @@
 snippet gcd "Math - greatest common divisor"
-inline ${1:int} gcd($1 x,$1 y){return !y?x:gcd(y,x%y);}
+int gcd(int a,int b){return !b?a:gcd(b,a%b);}
 endsnippet
+snippet lcm "Math - least common multiple"
+inline int lcm(int x,int y){return x/gcd(x,y)*y;}
+endsnippet
+snippet qpow "Math - quick power"
+inline int qpow(int a,int b,int p){
+	int res=1;
+	while(b){if(b&1)res=1LL*res*a%p;a=1LL*a*a%p;b>>=1;}
+	return res;
+}
+endsnippet
+snippet exgcd "Math - extended gcd"
+int exgcd(int a,int b,int& x,int& y){
+	if(b==0)return x=1,y=0,a;
+	int tx,ty,res=exgcd(b,a%b,tx,ty);
+	x=ty,y=tx-a/b*ty;return res;
+}
+endsnippet
+snippet inv_exgcd "Math - inversion (exgcd)"
+inline int inv(int a,int p){
+	int x,y,tmp=exgcd(a,p,x,y);
+	if(tmp==-1)return -1;else return (x%p+p)%p;
+}
+endsnippet
+snippet inv_fermat "Math - inversion (Fermat's Little Theorem)"
+inline int inv(int a,int p){return qpow(a,p-2,p);}
+endsnippet
+snippet inv_linear "Math - inversion (linear algorithm)"
+inline void init_inv(int p){
+	inv[1]=1;
+	for(int i=2;i<=N;i++)
+		inv[i]=p-1LL*(p/i)*inv[p%i]%p;
+}
+endsnippet
+snippet matrix "Math - matrix"
+struct Matrix{
+	int n,m,a[N+10][N+10];
+	Matrix(int _n=0,int _m=0):n(_n),m(_m){for(int i=1;i<=n;i++)for(int j=1;j<=m;j++)a[i][j]=0;}
+	inline int* operator[](int i){return a[i];}
+	inline const int* operator[](int i)const{return a[i];}
+};
 
-snippet gauss "Math - Gauss-Jordan Elimination"
-bool Gauss(){
-	for(int i=1;i<=n;i++){
-		int t=i;
-		for(int j=i+1;j<=n;j++)
-			if(fabs(a[j][i])>fabs(a[t][i]))t=j;
-		if(fabs(a[t][i])<eps)return 0;
-		std::swap(a[i],a[t]);
-		for(int j=1;j<=n;j++){
-			if(i==j)continue;
-			double r=-a[j][i]/a[i][i];
-			for(int k=i;k<=n+1;k++)a[j][k]+=r*a[i][k];
-		}
+inline Matrix operator*(const Matrix& A,const Matrix& B){
+	Matrix C(A.n,B.m);
+	for(int i=1;i<=C.n;i++)
+		for(int j=1;j<=C.m;j++)
+			for(int k=1;k<=A.m;k++)
+				C[i][j]=(C[i][j]+1LL*A[i][k]*B[k][j]%P)%P;
+	return C;
+}
+
+inline Matrix qpow(Matrix A,int b){
+	Matrix res(A.n,A.n);for(int i=1;i<=res.n;i++)res[i][i]=1;
+	while(b){if(b&1)res=res*A;A=A*A;b>>=1;}
+	return res;
+}
+endsnippet
+snippet comb_linear "Math - combinatorial number (linear algorithm)"
+void init_comb(int p){
+	fac[0]=1;
+	for(int i=1;i<p;i++)fac[i]=1LL*fac[i-1]*i%p;
+	ifac[p-1]=inv(fac[p-1],p);
+	for(int i=p-2;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
+}
+
+inline int C(int a,int b,int p){return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
+endsnippet
+snippet comb_lucas "Math - combinatorial number (Lucas' Theorem)"
+void init_comb(int p){
+	fac[0]=1;
+	for(int i=1;i<p;i++)fac[i]=1LL*fac[i-1]*i%p;
+	ifac[p-1]=inv(fac[p-1],p);
+	for(int i=p-2;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
+}
+
+inline int comb(int a,int b,int p){return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
+int C(int a,int b,int p){if(!b)return 1;else return 1LL*comb(a%p,b%p,p)*C(a/p,b/p,p)%p;}
+endsnippet
+snippet comb_sqr "Math - combinatorial number (O(n^2) algorithm)"
+void init_comb(int p){
+	C[0][0]=1;
+	for(int i=1;i<=N;i++){
+		C[i][0]=1;
+		for(int j=1;j<=N;j++)
+			C[i][j]=(C[i-1][j]+C[i-1][j-1])%p;
 	}
-	return 1;
 }
 endsnippet
