@@ -2,7 +2,7 @@ snippet gcd "Math - greatest common divisor"
 int gcd(int a,int b){return !b?a:gcd(b,a%b);}
 endsnippet
 snippet lcm "Math - least common multiple"
-inline int lcm(int x,int y){return x/gcd(x,y)*y;}
+inline int lcm(int a,int b){return a/gcd(a,b)*b;}
 endsnippet
 snippet qpow "Math - quick power"
 inline int qpow(int a,int b,int p){
@@ -84,5 +84,45 @@ void init_comb(int p){
 		for(int j=1;j<=N;j++)
 			C[i][j]=(C[i-1][j]+C[i-1][j-1])%p;
 	}
+}
+endsnippet
+snippet crt "Math - Chinese Remainder Theorem"
+void merge(int& a1,int& b1,int a2,int b2){
+	if(b2>b1)std::swap(a1,a2),std::swap(b1,b2);
+	while(a1%b2!=a2)a1+=b1;
+	b1=lcm(b1,b2);
+}
+
+int CRT(int* a,int* b){
+	int x=a[1],y=b[1];
+	for(int i=2;i<=n;i++)merge(x,y,a[i],b[i]);
+	return x;
+}
+endsnippet
+snippet bsgs "Math - Baby Step Giant Step"
+int BSGS(int a,int b,int p){
+	int s=int(ceil(sqrt(p)));std::map<int,int> ma;
+	for(int i=0,x=1;i<s;i++,x=1LL*x*a%p)if(!ma.count(x))ma[x]=i;
+	for(int i=0,y=inv(qpow(a,s,p),p),z=b;i<=s;i++,z=1LL*z*y%p)if(ma.count(z))return i*s+ma[z];
+	return -1;
+}
+endsnippet
+snippet exbsgs "Math - extended BSGS"
+int BSGS(int a,int b,int p,int tmp){
+	int s=int(ceil(sqrt(p)));std::map<int,int> ma;
+	for(int i=0,x=1;i<s;i++,x=1LL*x*a%p)if(!ma.count(x))ma[x]=i;
+	for(int i=0,y=inv(qpow(a,s,p),p),z=1LL*b*inv(tmp,p)%p;i<=s;i++,z=1LL*z*y%p)if(ma.count(z))return i*s+ma[z];
+	return -1;
+}
+
+int exBSGS(int a,int b,int p){
+	if(b==1)return 0;
+	int d,tmp=1,k=0;
+	while((d=gcd(a,p))>1){
+		if(b%d)return -1;
+		b/=d,p/=d,k++;
+		if((tmp=1LL*tmp*(a/d)%p)==b)return k;
+	}
+	int res=BSGS(a,b,p,tmp);return res==-1?-1:res+k;
 }
 endsnippet
