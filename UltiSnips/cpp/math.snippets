@@ -30,7 +30,7 @@ endsnippet
 snippet inv_linear "Math - inversion (linear algorithm)"
 inline void init_inv(int p){
 	inv[1]=1;
-	for(int i=2;i<=N;i++)
+	for(int i=2;i<=std::min(N,p-1);i++)
 		inv[i]=p-1LL*(p/i)*inv[p%i]%p;
 }
 endsnippet
@@ -59,20 +59,18 @@ inline Matrix qpow(Matrix A,int b){
 endsnippet
 snippet comb_linear "Math - combinatorial number (linear algorithm)"
 void init_comb(int p){
-	fac[0]=1;
-	for(int i=1;i<p;i++)fac[i]=1LL*fac[i-1]*i%p;
-	ifac[p-1]=inv(fac[p-1],p);
-	for(int i=p-2;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
+	int lim=std::min(N,p-1);
+	fac[0]=1;for(int i=1;i<=lim;i++)fac[i]=1LL*fac[i-1]*i%p;
+	ifac[lim]=inv(fac[lim],p);for(int i=lim-1;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
 }
 
 inline int C(int a,int b,int p){return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
 endsnippet
 snippet comb_lucas "Math - combinatorial number (Lucas' Theorem)"
 void init_comb(int p){
-	fac[0]=1;
-	for(int i=1;i<p;i++)fac[i]=1LL*fac[i-1]*i%p;
-	ifac[p-1]=inv(fac[p-1],p);
-	for(int i=p-2;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
+	int lim=std::min(N,p-1);
+	fac[0]=1;for(int i=1;i<=lim;i++)fac[i]=1LL*fac[i-1]*i%p;
+	ifac[lim]=inv(fac[lim],p);for(int i=lim-1;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
 }
 
 inline int comb(int a,int b,int p){return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
