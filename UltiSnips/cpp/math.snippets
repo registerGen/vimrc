@@ -34,7 +34,7 @@ endsnippet
 snippet inv_exgcd "Math - inversion (exgcd)"
 inline int inv(int a,int p){
 	int x,y,tmp=exgcd(a,p,x,y);
-	if(tmp==-1)return -1;else return (x%p+p)%p;
+	if(tmp!=1)return -1;else return (x%p+p)%p;
 }
 endsnippet
 snippet inv_fermat "Math - inversion (Fermat's Little Theorem)"
@@ -77,7 +77,7 @@ void init_comb(int p){
 	ifac[lim]=inv(fac[lim],p);for(int i=lim-1;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
 }
 
-inline int C(int a,int b,int p){return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
+inline int C(int a,int b,int p){if(a<b)return 0;else return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
 endsnippet
 snippet comb_lucas "Math - combinatorial number (Lucas' Theorem)"
 void init_comb(int p){
@@ -86,8 +86,8 @@ void init_comb(int p){
 	ifac[lim]=inv(fac[lim],p);for(int i=lim-1;i>=0;i--)ifac[i]=1LL*ifac[i+1]*(i+1)%p;
 }
 
-inline int comb(int a,int b,int p){return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
-int C(int a,int b,int p){if(!b)return 1;else return 1LL*comb(a%p,b%p,p)*C(a/p,b/p,p)%p;}
+inline int comb(int a,int b,int p){if(a<b)return 0;else return 1LL*fac[a]*ifac[b]%p*ifac[a-b]%p;}
+int C(int a,int b,int p){if(a<b)return 0;if(!b)return 1;else return 1LL*C(a/p,b/p,p)*comb(a%p,b%p,p)%p;}
 endsnippet
 snippet comb_sqr "Math - combinatorial number (O(n^2) algorithm)"
 void init_comb(int p){
@@ -106,14 +106,15 @@ void merge(int& a1,int& b1,int a2,int b2){
 	b1=lcm(b1,b2);
 }
 
-int CRT(int* a,int* b){
+int CRT(int* a,int* b,int num){
 	int x=a[1],y=b[1];
-	for(int i=2;i<=n;i++)merge(x,y,a[i],b[i]);
+	for(int i=2;i<=num;i++)merge(x,y,a[i],b[i]);
 	return x;
 }
 endsnippet
 snippet bsgs "Math - Baby Step Giant Step"
 int BSGS(int a,int b,int p){
+	if(a==0){if(b==0)return 1;else return -1;}
 	int s=int(ceil(sqrt(p)));std::map<int,int> ma;
 	for(int i=0,x=1;i<s;i++,x=1LL*x*a%p)if(!ma.count(x))ma[x]=i;
 	for(int i=0,y=inv(qpow(a,s,p),p),z=b;i<=s;i++,z=1LL*z*y%p)if(ma.count(z))return i*s+ma[z];
@@ -122,6 +123,7 @@ int BSGS(int a,int b,int p){
 endsnippet
 snippet exbsgs "Math - extended BSGS"
 int BSGS(int a,int b,int p,int tmp){
+	if(a==0){if(b==0)return 1;else return -1;}
 	int s=int(ceil(sqrt(p)));std::map<int,int> ma;
 	for(int i=0,x=1;i<s;i++,x=1LL*x*a%p)if(!ma.count(x))ma[x]=i;
 	for(int i=0,y=inv(qpow(a,s,p),p),z=1LL*b*inv(tmp,p)%p;i<=s;i++,z=1LL*z*y%p)if(ma.count(z))return i*s+ma[z];
