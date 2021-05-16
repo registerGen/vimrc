@@ -25,7 +25,7 @@ inline ll qpow(ll a,ll b,ll p){
 }
 endsnippet
 snippet exgcd "Math - extended gcd"
-int exgcd(int a,int b,int& x,int& y){
+int exgcd(int a,int b,int &x,int &y){
 	if(b==0)return x=1,y=0,a;
 	int tx,ty,res=exgcd(b,a%b,tx,ty);
 	x=ty,y=tx-a/b*ty;return res;
@@ -55,7 +55,7 @@ struct Matrix{
 	inline const int* operator[](int i)const{return a[i];}
 };
 
-inline Matrix operator*(const Matrix& A,const Matrix& B){
+inline Matrix operator*(const Matrix &A,const Matrix &B){
 	Matrix C(A.n,B.m);
 	for(int i=1;i<=C.n;i++)
 		for(int j=1;j<=C.m;j++)
@@ -100,13 +100,13 @@ void init_comb(int p){
 }
 endsnippet
 snippet crt "Math - Chinese Remainder Theorem"
-void merge(int& a1,int& b1,int a2,int b2){
+void merge(int &a1,int &b1,int a2,int b2){
 	if(b2>b1)std::swap(a1,a2),std::swap(b1,b2);
 	while(a1%b2!=a2)a1+=b1;
 	b1=lcm(b1,b2);
 }
 
-int CRT(int* a,int* b,int num){
+int CRT(int *a,int *b,int num){
 	int x=a[1],y=b[1];
 	for(int i=2;i<=num;i++)merge(x,y,a[i],b[i]);
 	return x;
