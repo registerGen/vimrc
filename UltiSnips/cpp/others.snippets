@@ -2,7 +2,7 @@ snippet gen_template "Generator's template"
 #include"testlib.h"
 
 const char* name="data/$1";
-const int T=${2:20};
+const int T=$2;
 
 inline void open(int t){
 	fprintf(stderr,"open(): file name is %s%d.in\n",name,t);
@@ -24,15 +24,17 @@ inline void val(int t){
 	}
 }
 
-inline void genAns(int t){
-	fprintf(stderr,"genAns(): command is ./std <%s%d.in >%s%d.ans\n",name,t,name,t);
+inline void gen_ans(int t){
+	fprintf(stderr,"gen_ans(): command is ./std <%s%d.in >%s%d.ans\n",name,t,name,t);
 	char cmd[100];
 	sprintf(cmd,"./std <%s%d.in >%s%d.ans",name,t,name,t);
 	if(system(cmd)){
-		fprintf(stderr,"\033[31mgenAns(): answer file generation failed\033[0m\n");
+		fprintf(stderr,"\033[31mgen_ans(): answer file generation failed\033[0m\n");
 		exit(0);
 	}
 }
+
+void gen(int);
 
 int main(int argc,char** argv){
 	registerGen(argc,argv,1);
@@ -41,12 +43,11 @@ int main(int argc,char** argv){
 		gen(t);
 		fclose(stdout);
 		val(t);
-		genAns(t);
+		gen_ans(t);
 		fprintf(stderr,"\033[32m%s%d.in/.ans generated\033[0m\n",name,t);
 	}
 	return 0;
 }
-
 endsnippet
 snippet check
 #include<cstdio>
