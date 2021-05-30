@@ -141,6 +141,8 @@ function! Compile(additionalArgs) " {{{2
 		endif
 	elseif fileType == 'vim'
 		let cmd = 'so ' . fileName
+	elseif fileType == 'make'
+		let cmd = '!make'
 	else
 		call EchoError(printf('%s::Compile(): unrecognizable file type "%s"', s:vimrcName, fileType))
 		return
@@ -182,7 +184,7 @@ function! Run(additionalArgs) " {{{2
 		else
 			let cmd = '!./' . executableFileName
 		endif
-	elseif fileType == 'python' || fileType == 'vim'
+	elseif fileType == 'python' || fileType == 'vim' || fileType == 'make'
 		call Compile(a:additionalArgs)
 		return
 	else
@@ -212,7 +214,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'SirVer/ultisnips'
 Plug 'vim/killersheep'
-Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown'}
+"Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown'}
 Plug 'lervag/vimtex'
 call plug#end()
 
@@ -265,9 +267,6 @@ endif
 
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsExpandTrigger . ' <C-R>=g:UltiSnips_Complete()<cr>'
 autocmd InsertEnter * exec 'inoremap <silent> ' . g:UltiSnipsJumpBackwardTrigger . ' <C-R>=g:UltiSnips_Reverse()<cr>'
-
-" Subsection: Pathogen {{{2
-execute pathogen#infect('~/projects/vim_plugins/{}')
 
 " Subsection: VimTex {{{2
 let g:vimtex_view_enabled = 0
