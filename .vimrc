@@ -176,6 +176,7 @@ function! Run(additionalArgs) " {{{2
 		echom printf('%s::Run(): file "%s" not compiled, we''ll compile it first', s:vimrcName, fileName)
 		let _additionalArgs = input(printf('%s::Run(): please input additional arguments for compiling: ', s:vimrcName))
 		call Compile(_additionalArgs)
+		return
 	endif
 
 	if fileType == 'cpp' || fileType == 'c'
